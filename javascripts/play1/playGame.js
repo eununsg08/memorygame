@@ -1,14 +1,23 @@
+const wait = (timeToDelay) => new Promise((resolve) => setTimeout(resolve, timeToDelay));
+//찾기
 const gameContainer = document.body.querySelector('#gameContainer');
 const StartBtn = document.body.querySelector('.StartBtn');
 const RestartBtn = document.body.querySelector('.ReStartBtn');
 const score = document.body.querySelector('#score');
-const wait = (timeToDelay) => new Promise((resolve) => setTimeout(resolve, timeToDelay));
+const roulette = document.body.querySelector('#roulette');
+const rouletteImg = document.body.querySelector('#rouletteImg');
+//변수
+const savedUserDate=localStorage.getItem("Date");
 let locates = [];
 let colors = [];
 let chekReCall = 1;
 let userSelect = [];
 let chekAnswer = 0;
 let clickTimes = 0;
+let today = new Date();
+let day = today.getDate();
+//string
+const HIDDEN_CLASS="hidden";
 
 function arraysSame(arr1, arr2) { //모두 일치
     for (let i = 0; i < arr2.length; i++) {
@@ -35,19 +44,45 @@ const trimmingNDrainage = (a, n) => {
     return trimedCoordinates;
 }
 
+function rouletting(){
+    const explan = ["강제 여행 가능(단, 특수상황 제외)","5분-수제 마사지","기타, 플룻 뭐 아무거나 하기","노래 한 곡 부르기(단, 8시 이전)","간식 사옴","좋은 말","절","손 하트","사랑합니다"]
+    const gift = ["납치권", "마사지", "재롱잔치", "노래 한 곡", "간식사기", "덕담", "절", "하트", "사랑합니다"];
+    const pbt = [0, (25000 + (1875*chekReCall)), (75000 + (3750*chekReCall)), (125000 + (3750*chekReCall)) ,(200000+(5625*chekReCall)), (300000+(7500*chekReCall)), (400000+(7500*chekReCall)), (400000+(7500*chekReCall)) + Math.floor((1000000 - ((25000 + (1875*chekReCall)) + (50000 + (3750*chekReCall)) + (50000 + (3750*chekReCall)) + (75000+(5625*chekReCall)) + (100000+(7500*chekReCall)) + (100000+(7500*chekReCall)))) / 3), (400000+(7500*chekReCall)) + (2 * Math.floor((1000000 - ((25000 + (1875*chekReCall)) + (50000 + (3750*chekReCall)) + (50000 + (3750*chekReCall)) + (75000+(5625*chekReCall)) + (100000+(7500*chekReCall)) + (100000+(7500*chekReCall)))) / 3)), 1000000 ];
+    let ranNum = Math.floor((Math.random() * 999999) + 1);
+    let userGift = [];
+    for (let i = 0; i < gift.length; i++) {
+        if(pbt[i] < ranNum){
+            if(ranNum <= pbt[i + 1]){
+                userGift = [gift[i], explan[i]];
+            }
+        }
+    }
+    roulette.classList.remove(HIDDEN_CLASS);
+    roulette.classList.add("roulette");
+    roulette.querySelector(".s1").innerHTML = userGift[0];
+    roulette.querySelector(".s2").innerHTML = userGift[1];
+    rouletteImg.classList.remove(HIDDEN_CLASS);
+    rouletteImg.classList.add("rouletteImg");
+    setTimeout(()=> {
+        roulette.classList.add(HIDDEN_CLASS);
+        roulette.classList.remove("roulette");
+        rouletteImg.classList.add(HIDDEN_CLASS);
+        rouletteImg.classList.remove("rouletteImg");
+    }, 1000)
+    localStorage.setItem("Date", day);
+}
+
 function stop() {
     gameContainer.classList.remove("gameContainer");
-    gameContainer.classList.add("hidden");
+    gameContainer.classList.add(HIDDEN_CLASS);
     score.classList.add("score");
-    score.classList.remove("hidden");
-    score.querySelector(".s1").innerHTML = "틀렸습니다";
+    score.classList.remove(HIDDEN_CLASS);
+    score.querySelector(".s1").innerHTML = '땡!';
     score.querySelector(".s2").innerHTML = `당신의 점수는 ${chekReCall - 1}점 입니다`;
-    locates = [];
-    colors = [];
-    chekReCall = 1;
-    userSelect = [];
-    chekAnswer = 0;
-    clickTimes = 0;
+    console.log(Number(savedUserDate) !== day);
+    if(Number(savedUserDate) !== day) {
+        rouletting();
+    }
 }
 
 function answering() {
@@ -56,14 +91,14 @@ function answering() {
     gameContainer.addEventListener("mousedown", (current) => {current.target.classList.add("makeDarker")});
     gameContainer.addEventListener("mouseup", (current) => {current.target.classList.remove("makeDarker")});
     gameContainer.addEventListener("click", (current) => {
-        console.log(userSelect);
-        console.log(chekReCall);
         clickTimes += 1;
         userSelect.push(current.target.id);
         if ((clickTimes / chekReCall) == locates.length) {
             if (arraysSame(trimmingNDrainage(userSelect, chekReCall), tirmWhitI(locates))) {
                 chekReCall += 1;
-                makingCoordinate();
+                setTimeout(() => {
+                    makingCoordinate();
+                }, 500);
             } else {
                 stop();
             }
@@ -89,12 +124,23 @@ async function coloring() {
 const makingCoordinate = async () => {
     let number = Math.floor(Math.random() * 16 + 1);
     let randomColor = Math.floor(Math.random() * 4); //랜던 4가지 색
-    do{
-        number = Math.floor(Math.random() * 16 + 1);
+    if(chekReCall == 1){
+        for (let i = 0; i < 3; i++){
+            do{
+                number = Math.floor(Math.random() * 16 + 1);
+            }
+            while(number ==  locates[locates.length - 1]);
+            locates.push(number);
+            colors.push(randomColor);
+        }  
+    } else{
+        do{
+            number = Math.floor(Math.random() * 16 + 1);
+        }
+        while(number ==  locates[locates.length - 1]);
+        locates.push(number);
+        colors.push(randomColor);
     }
-    while(number ==  locates[locates.length - 1]);
-    locates.push(number);
-    colors.push(randomColor);
     const wait = await coloring();
     if (wait == true) {
         answering();
@@ -103,10 +149,10 @@ const makingCoordinate = async () => {
 
 function start() {
     score.classList.remove("score");
-    score.classList.add("hidden");
-    gameContainer.classList.remove("hidden");
+    score.classList.add(HIDDEN_CLASS);
+    gameContainer.classList.remove(HIDDEN_CLASS);
     gameContainer.classList.add("gameContainer");
-    StartBtn.classList.add("hidden");
+    StartBtn.classList.add(HIDDEN_CLASS);
     makingCoordinate();
 };
 
