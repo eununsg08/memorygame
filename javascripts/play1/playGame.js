@@ -68,7 +68,7 @@ function rouletting(){
         roulette.classList.remove("roulette");
         rouletteImg.classList.add(HIDDEN_CLASS);
         rouletteImg.classList.remove("rouletteImg");
-    }, 1000)
+    }, 2000)
     localStorage.setItem("Date", day);
 }
 
