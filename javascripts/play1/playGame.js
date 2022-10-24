@@ -6,6 +6,7 @@ const RestartBtn = document.body.querySelector('.ReStartBtn');
 const score = document.body.querySelector('#score');
 const roulette = document.body.querySelector('#roulette');
 const rouletteImg = document.body.querySelector('#rouletteImg');
+let langBtn = document.body.querySelector('#changingLanguage');
 //변수
 const savedUserDate=localStorage.getItem("Date");
 let locates = [];
@@ -44,6 +45,7 @@ const trimmingNDrainage = (a, n) => {
     return trimedCoordinates;
 }
 
+//roulet해서 뽑기
 function rouletting(){
     const explan = ["강제 여행 가능(단, 특수상황 제외)","5분-수제 마사지","기타, 플룻 뭐 아무거나 하기","노래 한 곡 부르기(단, 8시 이전)","간식 사옴","좋은 말","절","손 하트","사랑합니다"]
     const gift = ["납치권", "마사지", "재롱잔치", "노래 한 곡", "간식사기", "덕담", "절", "하트", "사랑합니다"];
@@ -77,11 +79,13 @@ function stop() {
     gameContainer.classList.add(HIDDEN_CLASS);
     score.classList.add("score");
     score.classList.remove(HIDDEN_CLASS);
-    score.querySelector(".s1").innerHTML = '땡!';
-    score.querySelector(".s2").innerHTML = `당신의 점수는 ${chekReCall - 1}점 입니다`;
+    score.querySelector(".s1").innerHTML = (langBtn.className == "i0" ? '땡!' : 'wrong!');
+    score.querySelector(".s2").innerHTML = (langBtn.className == "i0" ? `당신의 점수는 ${chekReCall - 1}점 입니다` : `Your score is ${chekReCall - 1}point${(chekReCall - 1 > 1) ? "s" : ""}`);
     console.log(Number(savedUserDate) !== day);
     if(Number(savedUserDate) !== day) {
-        rouletting();
+        if(langBtn.className == "i0"){
+            rouletting();
+        }
     }
 }
 
